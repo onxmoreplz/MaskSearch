@@ -1,5 +1,6 @@
 package com.example.masksearch;
 
+import android.location.Location;
 import android.util.Log;
 
 import androidx.lifecycle.MutableLiveData;
@@ -24,6 +25,7 @@ public class MainViewModel extends ViewModel {
     private static final String TAG = MainViewModel.class.getName();
 
     public MutableLiveData<List<Store>> itemLiveData = new MutableLiveData<>();
+    public Location location;
 
     // Retrofit
     private Retrofit retrofit = new Retrofit.Builder()

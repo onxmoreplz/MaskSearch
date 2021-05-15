@@ -45,6 +45,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        viewModel = new ViewModelProvider(this).get(MainViewModel.class);
+
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
         PermissionListener permissionlistener = new PermissionListener() {
             @Override
@@ -70,9 +72,8 @@ public class MainActivity extends AppCompatActivity {
     @SuppressLint("MissingPermission")
     private void performAction() {
         fusedLocationProviderClient.getLastLocation()
-                .addOnSuccessListener(this, new OnSuccessListener<Location>() {
-                    @Override
-                    public void onSuccess(Location location) {
+                .addOnSuccessListener(this, location -> {
+                    if(location != null) {
 
                     }
                 });
@@ -84,7 +85,7 @@ public class MainActivity extends AppCompatActivity {
         final StoreAdapter storeAdapter = new StoreAdapter();
         recyclerView.setAdapter(storeAdapter);
 
-        viewModel = new ViewModelProvider(this).get(MainViewModel.class);
+
 
         //UI 변경 감지 Observer
         viewModel.itemLiveData.observe(this, stores -> {
