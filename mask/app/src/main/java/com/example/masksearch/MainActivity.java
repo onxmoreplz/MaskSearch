@@ -39,6 +39,39 @@ public class MainActivity extends AppCompatActivity {
         final StoreAdapter storeAdapter = new StoreAdapter();
         recyclerView.setAdapter(storeAdapter);
 
+
+        // Retrofit
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(MaskService.BASE_URL)
+                .addConverterFactory(MoshiConverterFactory.create())
+                .build();
+
+        MaskService service = retrofit.create(MaskService.class);
+
+        Call<StoreInfo> storeInfoCall = service.fetchStoreInfo();
+
+        storeInfoCall.enqueue(new Callback<StoreInfo>() {
+            @Override
+            public void onResponse(Call<StoreInfo> call, Response<StoreInfo> response) {
+                List<Store> items = response.body().getStores();
+
+
+                storeAdapter.updateItems(items
+                        .stream()
+                        .filter(item -> item.getRemainStat() != null)
+                        .collect(Collectors.toList()));
+                getSupportActionBar().setTitle("마스크 재고 있는 : " + items.size());
+            }
+
+            @Override
+            public void onFailure(Call<StoreInfo> call, Throwable t) {
+                Log.e(TAG, "onFailure", t);
+            }
+        });
+
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
 
         MenuInflater mi = getMenuInflater();
