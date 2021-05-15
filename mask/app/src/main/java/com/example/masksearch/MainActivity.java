@@ -7,6 +7,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -26,6 +27,7 @@ import retrofit2.converter.moshi.MoshiConverterFactory;
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = MainActivity.class.getSimpleName();
+    private MainViewModel viewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,38 +41,15 @@ public class MainActivity extends AppCompatActivity {
         final StoreAdapter storeAdapter = new StoreAdapter();
         recyclerView.setAdapter(storeAdapter);
 
+        viewModel = new ViewModelProvider(this).get(MainViewModel.class);
 
-        // Retrofit
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(MaskService.BASE_URL)
-                .addConverterFactory(MoshiConverterFactory.create())
-                .build();
-
-        MaskService service = retrofit.create(MaskService.class);
-
-        Call<StoreInfo> storeInfoCall = service.fetchStoreInfo();
-
-        storeInfoCall.enqueue(new Callback<StoreInfo>() {
-            @Override
-            public void onResponse(Call<StoreInfo> call, Response<StoreInfo> response) {
-                List<Store> items = response.body().getStores();
-
-
-                storeAdapter.updateItems(items
-                        .stream()
-                        .filter(item -> item.getRemainStat() != null)
-                        .collect(Collectors.toList()));
-                getSupportActionBar().setTitle("마스크 재고 있는 : " + items.size());
-            }
-
-            @Override
-            public void onFailure(Call<StoreInfo> call, Throwable t) {
-                Log.e(TAG, "onFailure", t);
-            }
+        //UI 변경 감지 Observer
+        viewModel.itemLiveData.observe(this, stores -> {
+            storeAdapter.updateItems(stores);
+            getSupportActionBar().setTitle("마스크재고 있는 곳: " + stores.size());
         });
 
     }
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
 
@@ -85,7 +64,7 @@ public class MainActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.action_refresh:
                 // Refresh 버튼 클릭 이벤트 처리
-
+                viewModel.fetchStoreInfo();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
