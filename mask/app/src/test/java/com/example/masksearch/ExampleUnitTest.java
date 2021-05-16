@@ -1,6 +1,5 @@
 package com.example.masksearch;
 
-import com.example.masksearch.model.StoreInfo;
 import com.example.masksearch.repository.MaskService;
 
 import org.junit.Test;
