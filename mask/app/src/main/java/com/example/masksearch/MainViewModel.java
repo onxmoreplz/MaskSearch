@@ -25,6 +25,7 @@ public class MainViewModel extends ViewModel {
     private static final String TAG = MainViewModel.class.getName();
 
     public MutableLiveData<List<Store>> itemLiveData = new MutableLiveData<>();
+    public MutableLiveData<Boolean> loadingLiveData = new MutableLiveData<>();
     public Location location;
 
     // Retrofit
@@ -43,6 +44,9 @@ public class MainViewModel extends ViewModel {
     }
 
     public void fetchStoreInfo() {
+        //로딩 시작
+        loadingLiveData.setValue(true);
+
         storeInfoCall.clone().enqueue(new Callback<StoreInfo>() {
             @Override
             public void onResponse(Call<StoreInfo> call, Response<StoreInfo> response) {
@@ -53,12 +57,16 @@ public class MainViewModel extends ViewModel {
                         .collect(Collectors.toList());
 
                 itemLiveData.postValue(items);
+
+                loadingLiveData.postValue(false); // 로딩 종료
             }
 
             @Override
             public void onFailure(Call<StoreInfo> call, Throwable t) {
                 Log.e(TAG, "onFailure", t);
                 itemLiveData.postValue(Collections.emptyList());
+
+                loadingLiveData.postValue(false); // 로딩 종료
             }
         });
     }
